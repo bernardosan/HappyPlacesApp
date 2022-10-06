@@ -1,18 +1,26 @@
 package com.example.happyplacesapp
 
 
+import android.Manifest.permission.CAMERA
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Camera
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.happyplacesapp.databinding.ActivityAddHappyPlaceBinding
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -28,6 +36,10 @@ class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
     private var binding: ActivityAddHappyPlaceBinding? = null
     private var cal = Calendar.getInstance()
     private lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
+    companion object{
+        private const val CAMERA_PERMISSION_CODE = 1
+        private const val CAMERA_REQUEST_CODE = 2
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,10 +82,47 @@ class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
                 pictureDialog.setItems(pictureDialogItems){
                     _, which -> when(which) {
                         0 -> {choosePhotoFromGallery()}
-                        1 -> {}
+                        1 -> {capturePhotoFromCamera()}
                     }
                 }
                 pictureDialog.show()
+            }
+        }
+    }
+
+    private fun capturePhotoFromCamera() {
+        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent,CAMERA_REQUEST_CODE)
+        } else{
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA),
+                CAMERA_REQUEST_CODE)
+        }
+
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == CAMERA_PERMISSION_CODE){
+            if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                startActivityForResult(intent,CAMERA_REQUEST_CODE)
+            }
+        } else{
+            showRationalDialogForPermissions()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(resultCode == Activity.RESULT_OK){
+            if(requestCode == CAMERA_REQUEST_CODE){
+                val thumbNail: Bitmap = data!!.extras!!.get("data") as Bitmap
+                binding?.ivImageSrc?.setImageBitmap(thumbNail)
             }
         }
     }
