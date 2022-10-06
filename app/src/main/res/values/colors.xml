@@ -12,4 +12,5 @@
     <color name="colorLightBackground">#CDE6FF</color>
     <color name="colorDarkBackground">#3D518C</color>
     <color name="colorAccent">#adcbe3</color>
+    <color name="GRAY">#EFAEAEAE</color>
 </resources>
