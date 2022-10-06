@@ -1,7 +1,6 @@
 package com.example.happyplacesapp
 
 
-import android.Manifest.permission.CAMERA
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
@@ -10,7 +9,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Camera
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -36,9 +34,9 @@ class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
     private var binding: ActivityAddHappyPlaceBinding? = null
     private var cal = Calendar.getInstance()
     private lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
-    companion object{
-        private const val CAMERA_PERMISSION_CODE = 1
-        private const val CAMERA_REQUEST_CODE = 2
+    companion object {
+        const val CAMERA_PERMISSION_CODE = 1
+        const val CAMERA_REQUEST_CODE = 2
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
