@@ -41,7 +41,7 @@
             android:inputType="textCapWords"
             android:outlineProvider="none"
             android:password="false"
-            android:textColor="@color/GRAY"
+            android:textColor="@color/dark_gray"
             android:textColorHint="#7A8089"
             android:textIsSelectable="false" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -68,7 +68,7 @@
             android:inputType="text"
             android:outlineProvider="none"
             android:password="false"
-            android:textColor="@color/GRAY"
+            android:textColor="@color/dark_gray"
             android:textColorHint="#7A8089"
             android:textIsSelectable="false" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -83,7 +83,6 @@
         app:layout_constraintTop_toBottomOf="@id/et_description_layout"
         app:boxStrokeColor="@color/colorLightBackground"
         app:hintTextColor="@color/colorLightBackground"
-        app:helperTextTextColor="@color/colorLightBackground"
         >
 
         <androidx.appcompat.widget.AppCompatEditText
@@ -97,7 +96,7 @@
             android:inputType="date"
             android:outlineProvider="none"
             android:password="false"
-            android:textColor="@color/GRAY"
+            android:textColor="#EF534F4F"
             android:textColorHint="#7A8089"
             android:textIsSelectable="false" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -124,7 +123,7 @@
             android:inputType="phone"
             android:outlineProvider="none"
             android:password="false"
-            android:textColor="@color/GRAY"
+            android:textColor="@color/dark_gray"
             android:textColorHint="#7A8089"
             android:textIsSelectable="false"
             />
@@ -145,7 +144,7 @@
         />
 
     <TextView
-        android:id="@+id/btn_image"
+        android:id="@+id/tv_addimage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
@@ -156,6 +155,7 @@
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/iv_imageSrc"
         android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
         app:layout_constraintEnd_toEndOf="@id/et_location_layout"
         app:layout_constraintTop_toTopOf="@id/iv_imageSrc"
         app:layout_constraintBottom_toBottomOf="@id/iv_imageSrc"/>

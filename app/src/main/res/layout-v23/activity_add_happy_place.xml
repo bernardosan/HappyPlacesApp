@@ -145,7 +145,7 @@
         />
 
     <TextView
-        android:id="@+id/btn_image"
+        android:id="@+id/tv_addimage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
