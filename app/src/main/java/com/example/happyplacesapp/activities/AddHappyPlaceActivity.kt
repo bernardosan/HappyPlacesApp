@@ -1,4 +1,4 @@
-package com.example.happyplacesapp
+package com.example.happyplacesapp.activities
 
 
 import android.app.Activity
@@ -20,7 +20,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.happyplacesapp.R
+import com.example.happyplacesapp.database.DatabaseHandler
 import com.example.happyplacesapp.databinding.ActivityAddHappyPlaceBinding
+import com.example.happyplacesapp.models.HappyPlaceModel
 import com.example.happyplacesapp.utils.Constants
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -34,11 +37,14 @@ import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
+class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
     private var binding: ActivityAddHappyPlaceBinding? = null
     private var cal = Calendar.getInstance()
     private lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
+    private var saveImageToInternalStorage : Uri? = null
+    private var mLatitude : Double = 0.0
+    private var mLongitude : Double = 0.0
 
     companion object {
         const val CAMERA_PERMISSION_CODE = 1
@@ -66,6 +72,7 @@ class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
 
         binding?.etDate?.setOnClickListener(this)
         binding?.tvAddimage?.setOnClickListener(this)
+        binding?.btnSave?.setOnClickListener(this)
 
 
     }
@@ -73,7 +80,7 @@ class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
     override fun onClick(p0: View?) {
         when(p0!!.id){
             R.id.et_date -> {
-                DatePickerDialog(this@AddHappyPlace,
+                DatePickerDialog(this@AddHappyPlaceActivity,
                     dateSetListener,
                     cal.get(Calendar.YEAR),
                     cal.get(Calendar.MONTH),
@@ -92,16 +99,40 @@ class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
                 }
                 pictureDialog.show()
             }
+            R.id.btn_save ->{
+               if (binding?.etTitle?.text.isNullOrEmpty() || saveImageToInternalStorage == null) {
+                    Toast.makeText(this, "You need at least to enter a title and image.", Toast.LENGTH_SHORT).show()
+               } else {
+                   val handler = DatabaseHandler(this)
+                   val model = HappyPlaceModel(
+                       0,
+                       binding?.etTitle?.text.toString(),
+                       saveImageToInternalStorage.toString(),
+                       binding?.etTitle?.text.toString(),
+                       binding?.etDate?.text.toString(),
+                       binding?.etLocation?.text.toString(),
+                       mLatitude,
+                       mLongitude
+                   )
+
+                   val handlerResult = handler.addHappyPlace(model)
+
+                   if(handlerResult > 0){
+                       Toast.makeText(this, "Happy place saved!", Toast.LENGTH_SHORT).show()
+                   }
+               }
+            }
         }
     }
 
     private fun capturePhotoFromCamera() {
         if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            startActivityForResult(intent,CAMERA_REQUEST_CODE)
+            startActivityForResult(intent, CAMERA_REQUEST_CODE)
         } else{
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA),
-                CAMERA_REQUEST_CODE)
+                CAMERA_REQUEST_CODE
+            )
         }
 
     }
@@ -115,7 +146,7 @@ class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
         if(requestCode == CAMERA_PERMISSION_CODE){
             if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                startActivityForResult(intent,CAMERA_REQUEST_CODE)
+                startActivityForResult(intent, CAMERA_REQUEST_CODE)
             }
         } else{
             showRationalDialogForPermissions()
@@ -133,9 +164,9 @@ class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
                     val contentURI = data.data
                     try {
                         val selectedImageBitmap = MediaStore.Images.Media.getBitmap(this.contentResolver,contentURI)
-                        val savedImage = saveImageToInternalStorage(selectedImageBitmap)
+                        saveImageToInternalStorage = saveImageToInternalStorage(selectedImageBitmap)
 
-                        Log.e("Saved Image", "path: $savedImage")
+                        Log.e("Saved Image", "path: $saveImageToInternalStorage")
 
                         binding?.ivImageSrc?.setImageBitmap(selectedImageBitmap)
 
@@ -157,7 +188,7 @@ class AddHappyPlace : AppCompatActivity(), View.OnClickListener {
                 if (report?.areAllPermissionsGranted() == true){
                     val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                     startActivityForResult(galleryIntent, Constants.GALLERY)
-                    Toast.makeText(this@AddHappyPlace,"Permissions to READ/WRITE storage granted.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddHappyPlaceActivity,"Permissions to READ/WRITE storage granted.", Toast.LENGTH_SHORT).show()
                 }
             }
             override fun onPermissionRationaleShouldBeShown(
