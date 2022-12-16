@@ -7,7 +7,7 @@ object Constants {
 
     const val DATABASE_NAME = "HappyPlacesDatabase"
     const val DATABASE_VERSION = 1
-    const val TABLE_NAME = "Happy Places Table"
+    const val TABLE_NAME = "Happy_Places"
 
     const val KEY_ID = "uid"
     const val KEY_TITLE = "title"
