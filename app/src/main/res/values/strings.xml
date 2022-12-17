@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">HappyPlacesApp</string>
+    <string name="image_content_description">Image content description</string>
+    <string name="no_happy_places_available_yet">No happy places available yet!</string>
 </resources>
