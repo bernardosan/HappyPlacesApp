@@ -23,7 +23,7 @@ class HappyPlacesAdapter (
 
             itemView.setOnClickListener {
                 if(onClickListener != null) {
-                    onClickListener!!.onClick(position)
+                    onClickListener!!.onClick(position, item)
                 }
             }
 
@@ -36,7 +36,7 @@ class HappyPlacesAdapter (
     }
 
     interface  OnClickListener {
-        fun onClick(position: Int)
+        fun onClick(position: Int, model: HappyPlaceModel)
     }
 
     fun setOnClickListener(onClickListener: OnClickListener){

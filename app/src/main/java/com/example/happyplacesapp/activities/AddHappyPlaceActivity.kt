@@ -119,7 +119,10 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
                    if(handlerResult > 0){
                        Toast.makeText(this, "Happy place saved!", Toast.LENGTH_SHORT).show()
+                       setResult(Activity.RESULT_OK)
+                       finish()
                    }
+
                }
             }
         }

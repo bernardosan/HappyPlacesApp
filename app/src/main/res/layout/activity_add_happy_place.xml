@@ -36,12 +36,10 @@
             android:id="@+id/et_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autoText="false"
-            android:hint="Title"
+            android:hint="@string/title"
             android:inputType="textCapWords"
             android:outlineProvider="none"
-            android:password="false"
-            android:textColor="@color/dark_gray"
+            android:textColor="@color/secondary_text_color"
             android:textColorHint="#7A8089"
             android:textIsSelectable="false" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -63,12 +61,10 @@
             android:id="@+id/et_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autoText="false"
-            android:hint="Description"
+            android:hint="@string/description"
             android:inputType="text"
             android:outlineProvider="none"
-            android:password="false"
-            android:textColor="@color/dark_gray"
+            android:textColor="@color/secondary_text_color"
             android:textColorHint="#7A8089"
             android:textIsSelectable="false" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -89,14 +85,12 @@
             android:id="@+id/et_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autoText="false"
-            android:hint="Date"
+            android:hint="@string/date"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:inputType="date"
             android:outlineProvider="none"
-            android:password="false"
-            android:textColor="#EF534F4F"
+            android:textColor="@color/secondary_text_color"
             android:textColorHint="#7A8089"
             android:textIsSelectable="false" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -118,12 +112,10 @@
             android:id="@+id/et_location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autoText="false"
-            android:hint="Location"
-            android:inputType="phone"
+            android:hint="@string/location"
+            android:inputType="text"
             android:outlineProvider="none"
-            android:password="false"
-            android:textColor="@color/dark_gray"
+            android:textColor="@color/secondary_text_color"
             android:textColorHint="#7A8089"
             android:textIsSelectable="false"
             />
@@ -141,24 +133,24 @@
         android:src="@drawable/add_screen_image_placeholder"
         android:background="@drawable/rectangular_border"
         android:padding="3dp"
-        />
+        android:contentDescription="@string/image_content_description" />
 
     <TextView
         android:id="@+id/tv_addimage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
-        android:text="ADD IMAGE "
+        android:text="@string/add_image"
         android:textColor="@color/colorPrimary"
         android:padding="12sp"
         android:textSize="19sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/iv_imageSrc"
         android:foreground="?attr/selectableItemBackground"
-        android:clickable="true"
         app:layout_constraintEnd_toEndOf="@id/et_location_layout"
         app:layout_constraintTop_toTopOf="@id/iv_imageSrc"
-        app:layout_constraintBottom_toBottomOf="@id/iv_imageSrc"/>
+        app:layout_constraintBottom_toBottomOf="@id/iv_imageSrc"
+        tools:ignore="UnusedAttribute" />
 
     <Button
         android:id="@+id/btn_save"
@@ -168,7 +160,7 @@
         android:layout_marginBottom="30dp"
         android:backgroundTint="@color/colorPrimary"
         android:backgroundTintMode="@color/colorPrimary"
-        android:text="SAVE"
+        android:text="@string/save"
         android:padding="12sp"
         android:textSize="16sp"
         android:textStyle="bold"
