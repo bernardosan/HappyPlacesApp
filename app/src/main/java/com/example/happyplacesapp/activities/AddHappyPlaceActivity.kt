@@ -46,6 +46,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private var mLatitude : Double = 0.0
     private var mLongitude : Double = 0.0
 
+    private var mHappyPlaceDetails: HappyPlaceModel? = null
+
     companion object {
         const val CAMERA_PERMISSION_CODE = 1
         const val CAMERA_REQUEST_CODE = 2
@@ -56,11 +58,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         binding = ActivityAddHappyPlaceBinding.inflate(layoutInflater)
         setContentView(binding?.root)
-        setSupportActionBar(binding?.toolbarAddPlace)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding?.toolbarAddPlace?.setNavigationOnClickListener {
-            onBackPressed()
-        }
+
+        setupToolbar()
 
         dateSetListener = DatePickerDialog.OnDateSetListener{
                 _, year, month, dayOfMonth ->
@@ -70,11 +69,39 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             updateDateInView()
         }
 
+        if(intent.hasExtra(Constants.EXTRA_PLACE_DETAILS)){
+            mHappyPlaceDetails = intent.getParcelableExtra(Constants.EXTRA_PLACE_DETAILS) as HappyPlaceModel?
+        }
+
+        if(mHappyPlaceDetails != null){
+            supportActionBar?.title = "Edit Happy Place"
+            binding?.btnSave?.text = "Save"
+
+            binding?.etTitle?.setText(mHappyPlaceDetails!!.title)
+            binding?.etDescription?.setText(mHappyPlaceDetails!!.description)
+            binding?.etDate?.setText(mHappyPlaceDetails!!.date)
+            binding?.etLocation?.setText(mHappyPlaceDetails!!.location)
+            binding?.ivImageSrc?.setImageURI(Uri.parse(mHappyPlaceDetails!!.image))
+            mLatitude = mHappyPlaceDetails!!.latitude
+            mLongitude = mHappyPlaceDetails!!.longitude
+
+
+            saveImageToInternalStorage = (Uri.parse(mHappyPlaceDetails!!.image))
+        }
+
         binding?.etDate?.setOnClickListener(this)
         binding?.tvAddimage?.setOnClickListener(this)
         binding?.btnSave?.setOnClickListener(this)
 
 
+    }
+
+    private fun setupToolbar() {
+        setSupportActionBar(binding?.toolbarAddPlace)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding?.toolbarAddPlace?.setNavigationOnClickListener {
+            onBackPressed()
+        }
     }
 
     override fun onClick(p0: View?) {
@@ -105,7 +132,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                } else {
                    val handler = DatabaseHandler(this)
                    val model = HappyPlaceModel(
-                       0,
+                       if(mHappyPlaceDetails == null) 0 else mHappyPlaceDetails!!.id,
                        binding?.etTitle?.text.toString(),
                        saveImageToInternalStorage.toString(),
                        binding?.etTitle?.text.toString(),
@@ -115,12 +142,21 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                        mLongitude
                    )
 
-                   val handlerResult = handler.addHappyPlace(model)
 
-                   if(handlerResult > 0){
-                       Toast.makeText(this, "Happy place saved!", Toast.LENGTH_SHORT).show()
-                       setResult(Activity.RESULT_OK)
-                       finish()
+                   if (mHappyPlaceDetails == null) {
+                       val handlerResult = handler.addHappyPlace(model)
+                       if(handlerResult > 0){
+                           Toast.makeText(this, "Happy place added!", Toast.LENGTH_SHORT).show()
+                           setResult(Activity.RESULT_OK)
+                           finish()
+                       }
+                   } else {
+                       val handlerResult = handler.updateHappyPlace(model)
+                       if(handlerResult > 0){
+                           Toast.makeText(this, "Happy place saved!", Toast.LENGTH_SHORT).show()
+                           setResult(Activity.RESULT_OK)
+                           finish()
+                       }
                    }
 
                }
@@ -162,6 +198,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             if(requestCode == Constants.CAMERA){
                 val thumbNail: Bitmap = data!!.extras!!.get("data") as Bitmap
                 binding?.ivImageSrc?.setImageBitmap(thumbNail)
+                saveImageToInternalStorage = saveImageToInternalStorage(thumbNail)
             } else if (requestCode == Constants.GALLERY) {
                 if(data != null){
                     val contentURI = data.data

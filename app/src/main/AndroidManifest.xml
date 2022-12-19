@@ -15,7 +15,9 @@
         android:theme="@style/Theme.HappyPlacesApp">
         <activity
             android:name=".activities.HappyPlaceDetailActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/CustomNoActionBarTheme"/>
         <activity
             android:name=".activities.AddHappyPlaceActivity"
             android:exported="true"
@@ -24,6 +26,7 @@
             android:theme="@style/CustomNoActionBarTheme" />
         <activity
             android:name=".activities.MainActivity"
+            android:label="Happy Places"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

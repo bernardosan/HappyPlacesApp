@@ -1,13 +1,18 @@
 package com.example.happyplacesapp.adapters
 
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.happyplacesapp.activities.AddHappyPlaceActivity
+import com.example.happyplacesapp.activities.MainActivity
 import com.example.happyplacesapp.databinding.ItemHappyPlaceBinding
 import com.example.happyplacesapp.models.HappyPlaceModel
+import com.example.happyplacesapp.utils.Constants
 
 class HappyPlacesAdapter (
     private val context: Context,
@@ -56,6 +61,18 @@ class HappyPlacesAdapter (
 
     override fun getItemCount(): Int {
         return list.size
+    }
+
+    fun removeAt(position: Int) {
+        list.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
+    fun notifyEditItem(activity: MainActivity, position: Int){
+        val intent = Intent(context, AddHappyPlaceActivity::class.java)
+        intent.putExtra(Constants.EXTRA_PLACE_DETAILS, list[position])
+        activity.resultLauncher.launch(intent)
+        notifyItemChanged(position)
     }
 
 }
