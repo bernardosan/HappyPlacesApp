@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.happyplacesapp">
-
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the "MyLocation" functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -14,10 +19,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HappyPlacesApp">
         <activity
+            android:name=".activities.MapsActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/CustomNoActionBarTheme" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
             android:name=".activities.HappyPlaceDetailActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/CustomNoActionBarTheme"/>
+            android:theme="@style/CustomNoActionBarTheme" />
         <activity
             android:name=".activities.AddHappyPlaceActivity"
             android:exported="true"
@@ -26,8 +40,8 @@
             android:theme="@style/CustomNoActionBarTheme" />
         <activity
             android:name=".activities.MainActivity"
-            android:label="Happy Places"
-            android:exported="true">
+            android:exported="true"
+            android:label="Happy Places">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
