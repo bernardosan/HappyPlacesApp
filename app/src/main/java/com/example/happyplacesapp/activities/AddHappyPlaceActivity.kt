@@ -1,30 +1,40 @@
 package com.example.happyplacesapp.activities
 
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
+import android.location.LocationManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.happyplacesapp.R
 import com.example.happyplacesapp.database.DatabaseHandler
 import com.example.happyplacesapp.databinding.ActivityAddHappyPlaceBinding
 import com.example.happyplacesapp.models.HappyPlaceModel
 import com.example.happyplacesapp.utils.Constants
+import com.google.android.gms.location.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
@@ -34,13 +44,18 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 import java.lang.Exception
+import java.lang.StringBuilder
 import java.text.SimpleDateFormat
 import java.util.*
+
+
+
 
 class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -51,7 +66,11 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private var mLatitude : Double = 0.0
     private var mLongitude : Double = 0.0
 
+    private lateinit var mProgressDialog: Dialog
+
     private var mHappyPlaceDetails: HappyPlaceModel? = null
+
+    private lateinit var mFusedLocationClient: FusedLocationProviderClient
 
     companion object {
         const val CAMERA_PERMISSION_CODE = 1
@@ -66,6 +85,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(binding?.root)
 
         setupToolbar()
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         dateSetListener = DatePickerDialog.OnDateSetListener{
                 _, year, month, dayOfMonth ->
@@ -99,15 +120,11 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         binding?.tvAddimage?.setOnClickListener(this)
         binding?.btnSave?.setOnClickListener(this)
         binding?.etLocation?.setOnClickListener(this)
+        binding?.tvSelectCurrentLocation?.setOnClickListener(this)
 
         if(!Places.isInitialized()){
             Places.initialize(this@AddHappyPlaceActivity, resources.getString(R.string.google_maps_key))
-
-
         }
-
-
-
 
     }
 
@@ -194,7 +211,46 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                     e.printStackTrace()
                 }
             }
+            R.id.tv_select_current_location ->{
+
+                if(!isLocationEnabled()){
+                    Toast.makeText(this, "Your location provider is turned off. Please turn your GPS on.", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivity(intent)
+                } else{
+                    Dexter.withActivity(this).withPermissions(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    ).withListener(object : MultiplePermissionsListener{
+
+                        override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                            if (report!!.areAllPermissionsGranted()) {
+                                showProgressDialog()
+                                requestLocationData()
+                            }
+
+                            if (report.isAnyPermissionPermanentlyDenied) {
+                                Toast.makeText(this@AddHappyPlaceActivity, "You have denied location permission.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onPermissionRationaleShouldBeShown(
+                            permissions: MutableList<PermissionRequest>?,
+                            token: PermissionToken?
+                        ) {
+                            showRationalDialogPermissions()
+                        }
+
+                    }).onSameThread().check()
+                }
+
+            }
         }
+    }
+
+    private fun isLocationEnabled(): Boolean{
+        val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
     private fun capturePhotoFromCamera() {
@@ -221,7 +277,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                 startActivityForResult(intent, CAMERA_REQUEST_CODE)
             }
         } else{
-            showRationalDialogForPermissions()
+            showRationalDialogPermissions()
         }
     }
 
@@ -279,12 +335,12 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                 permissions: MutableList<PermissionRequest>?,
                 token: PermissionToken?
             ) {
-                showRationalDialogForPermissions()
+                showRationalDialogPermissions()
             }
         }).onSameThread().check()
     }
 
-    private fun showRationalDialogForPermissions() {
+    private fun showRationalDialogPermissions() {
         AlertDialog.Builder(this).setMessage(
             "The permissions for this features have been denied. The permissions can be enabled in Applications Settings.")
             .setPositiveButton("GO TO SETTING"){
@@ -326,6 +382,75 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
         return  Uri.parse(file.absolutePath)
 
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun requestLocationData() {
+
+        val mLocationRequest = LocationRequest.create().apply {
+            interval = 0
+            numUpdates = 1
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+        }
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
+    }
+
+    private val mLocationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+
+            val mLastLocation: Location? = locationResult.lastLocation
+            if (mLastLocation != null) {
+                mLatitude = mLastLocation.latitude
+            }
+            Log.e("Current Latitude", "$mLatitude")
+            if (mLastLocation != null) {
+                mLongitude = mLastLocation.longitude
+            }
+            Log.e("Current Longitude", "$mLongitude")
+
+            getAddressFromLatLng(mLatitude, mLongitude)
+        }
+    }
+
+    private fun getAddressFromLatLng(latitude: Double, longitude: Double){
+
+        val geocoder = Geocoder(this, Locale.getDefault())
+
+        lifecycleScope.launch {
+            val addressList: List<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
+
+            if (addressList != null && addressList.isNotEmpty()) {
+                val address: Address = addressList[0]
+                val sb = StringBuilder()
+                for (i in 0..address.maxAddressLineIndex) {
+                    sb.append(address.getAddressLine(i)).append(" ")
+                }
+                sb.deleteCharAt(sb.length - 1)
+                binding?.etLocation?.setText(sb.toString())
+            } else {
+                Toast.makeText(
+                    this@AddHappyPlaceActivity,
+                    "Failed to load location",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+        }
+
+        hideProgressDialog()
+    }
+
+    private fun showProgressDialog(){
+        mProgressDialog = Dialog(this)
+        mProgressDialog.setContentView(R.layout.dialog_progress)
+        mProgressDialog.show()
+    }
+
+    private fun hideProgressDialog(){
+        mProgressDialog.dismiss()
     }
 
 }

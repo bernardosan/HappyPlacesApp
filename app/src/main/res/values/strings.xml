@@ -9,4 +9,6 @@
     <string name="description">Description</string>
     <string name="add_image">ADD IMAGE</string>
     <string name="save">SAVE</string>
+    <string name="add_place_select_current_location_text">SELECT CURRENT LOCATION</string>
+    <string name="please_wait">Please Wait...</string>
 </resources>
