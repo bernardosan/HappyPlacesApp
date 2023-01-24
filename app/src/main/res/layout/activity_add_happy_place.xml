@@ -133,7 +133,7 @@
             android:gravity="center"
             android:padding="@dimen/add_place_select_current_location_padding"
             android:text="@string/add_place_select_current_location_text"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="@dimen/add_place_select_current_location_textsize"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

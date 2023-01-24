@@ -24,7 +24,6 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -140,6 +139,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         when(p0!!.id){
             R.id.et_date -> {
                 DatePickerDialog(this@AddHappyPlaceActivity,
+                    R.style.MyDatePickerDialogTheme,
                     dateSetListener,
                     cal.get(Calendar.YEAR),
                     cal.get(Calendar.MONTH),
