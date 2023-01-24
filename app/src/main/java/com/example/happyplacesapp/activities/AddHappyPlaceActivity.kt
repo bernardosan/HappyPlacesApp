@@ -139,7 +139,6 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         when(p0!!.id){
             R.id.et_date -> {
                 DatePickerDialog(this@AddHappyPlaceActivity,
-                    R.style.MyDatePickerDialogTheme,
                     dateSetListener,
                     cal.get(Calendar.YEAR),
                     cal.get(Calendar.MONTH),
