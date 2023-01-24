@@ -166,7 +166,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                        if(mHappyPlaceDetails == null) 0 else mHappyPlaceDetails!!.id,
                        binding?.etTitle?.text.toString(),
                        saveImageToInternalStorage.toString(),
-                       binding?.etTitle?.text.toString(),
+                       binding?.etDescription?.text.toString(),
                        binding?.etDate?.text.toString(),
                        binding?.etLocation?.text.toString(),
                        mLatitude,
